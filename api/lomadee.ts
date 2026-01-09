@@ -13,7 +13,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(500).json({ error: "LOMADEE_APP_TOKEN not set" });
   }
 
-  const url = `https://api.lomadee.com/v3/${token}/offer/_search?sourceId=35886738&keyword=${encodeURIComponent(query)}&size=10`;
+  const url =
+  `https://api.lomadee.com/v3/${token}/product/search` +
+  `?keyword=${encodeURIComponent(query)}` +
+  `&sourceId=35886738` +
+  `&size=10`;
 
   try {
     const response = await fetch(url);
