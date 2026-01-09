@@ -23,7 +23,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const response = await fetch(url);
     const data = await response.json();
     res.status(200).json(data);
-  } catch (err) {
-    res.status(500).json({ error: "Failed to reach Lomadee", details: err });
-  }
+} catch (err: any) {
+  console.error("Lomadee fetch error:", err);
+  res.status(500).json({
+    error: "Failed to reach Lomadee",
+    message: err?.message,
+    stack: err?.stack
+  });
 }
