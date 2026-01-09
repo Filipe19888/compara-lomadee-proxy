@@ -1,33 +1,23 @@
-import type { VercelRequest, VercelResponse } from "vercel";
-
-export default async function handler(req: VercelRequest, res: VercelResponse) {
-  const query = req.query.q as string;
-
-  if (!query) {
-    return res.status(400).json({ error: "Missing query param ?q=" });
-  }
+export default async function handler(req: any, res: any) {
+  const q = (req.query?.q || "").toString().trim();
+  if (!q) return res.status(400).json({ error: "Missing query param ?q=" });
 
   const token = process.env.LOMADEE_APP_TOKEN;
-
-  if (!token) {
-    return res.status(500).json({ error: "LOMADEE_APP_TOKEN not set" });
-  }
+  if (!token) return res.status(500).json({ error: "LOMADEE_APP_TOKEN not set" });
 
   const url =
-  `https://api.lomadee.com/v3/${token}/product/search` +
-  `?keyword=${encodeURIComponent(query)}` +
-  `&sourceId=35886738` +
-  `&size=10`;
+    `https://api.lomadee.com/v3/${token}/offer/_search` +
+    `?sourceId=35886738&keyword=${encodeURIComponent(q)}&size=10`;
 
   try {
-    const response = await fetch(url);
-    const data = await response.json();
-    res.status(200).json(data);
-} catch (err: any) {
-  console.error("Lomadee fetch error:", err);
-  res.status(500).json({
-    error: "Failed to reach Lomadee",
-    message: err?.message,
-    stack: err?.stack
-  });
+    const r = await fetch(url, { headers: { "accept": "application/json" } });
+    const text = await r.text(); // helps debug non-JSON responses
+    res.status(r.status).setHeader("content-type", "application/json");
+    return res.send(text);
+  } catch (e: any) {
+    return res.status(500).json({
+      error: "Fetch failed",
+      message: e?.message || String(e),
+    });
+  }
 }
